@@ -31,6 +31,6 @@ pip install .\dist\data_processor_task-1.0.0-py3-none-any.whl
 ```python
 from my_processor.core import Member
 
-m = Member("John Doe", "john@example.com", "555-0101")
+m = Member("Kshitiz Gupta", "Kshitiz@example.com", "555-0101")
 print(m)
 ```
