@@ -1,0 +1,2 @@
+New-Item -ItemType File -Force -Path ".gitignore"
+"**/__pycache__/", "**/logs/", "**/plugins/", "*.pid", "*.db", "airflow_505/airflow-webserver.pid" | Out-File -FilePath ".gitignore" -Encoding utf8

@@ -1,0 +1,76 @@
+services:
+
+  # ---------- POSTGRES ----------
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+
+  # ---------- AIRFLOW INIT ----------
+  airflow-init:
+    image: apache/airflow:2.9.3
+    container_name: airflow-init
+    depends_on:
+      - postgres
+    user: "0:0"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__WEBSERVER__SECRET_KEY: my_super_secret_key
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+    command: >
+      bash -c " mkdir -p /opt/airflow/dags /opt/airflow/pyscript /opt/airflow/logs /opt/airflow/plugins &&
+      airflow db init &&
+      airflow users create
+      --username airflow
+      --password airflow
+      --firstname admin
+      --lastname user
+      --role Admin
+      --email admin@gmail.com
+      "
+    volumes:
+      - ./airflow_505:/opt/airflow
+
+  # ---------- AIRFLOW WEBSERVER ----------
+  airflow-webserver:
+    image: apache/airflow:2.9.3
+    container_name: airflow-webserver
+    depends_on:
+      - airflow-init
+    user: "0:0"
+    ports:
+      - "8082:8080"
+    command: bash -c "airflow webserver"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__WEBSERVER__SECRET_KEY: my_super_secret_key
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+    volumes:
+      - ./airflow_505:/opt/airflow
+
+  # ---------- AIRFLOW SCHEDULER ----------
+  airflow-scheduler:
+    image: apache/airflow:2.9.3
+    container_name: airflow-scheduler
+    depends_on:
+      - airflow-init
+    user: "0:0"
+    command: bash -c "airflow scheduler"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__WEBSERVER__SECRET_KEY: my_super_secret_key
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+    volumes:
+      - ./airflow_505:/opt/airflow
+
+volumes:
+  postgres-db-volume:
