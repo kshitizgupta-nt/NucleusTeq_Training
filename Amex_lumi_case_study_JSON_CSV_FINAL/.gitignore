@@ -1,0 +1,19 @@
+# Java/Maven
+lumi/target/
+*.class
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Runtime split/error output
+data_ingress/split_chunks/
+data_ingress/error_logs/
+
+# Airflow runtime
+airflow_workspace/logs/
+
+# IDE
+.idea/
+*.iml
+.vscode/
